@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mandelbrot Set Viewer</title>
+  </head>
+  <body>
+    <canvas id="mandelbrotCanvas" width="800" height="600"></canvas>
+  </body>
+  <script type="module">
+    import init, { generate_mandelbrot } from "./pkg/mandelbrotv2.js";
+
+    let zoomLevel = 1.0;
+    let centerX = -0.7;
+    let centerY = 0.0;
+
+    async function run() {
+      await init();
+
+      const canvas = document.getElementById("mandelbrotCanvas");
+      const ctx = canvas.getContext("2d");
+
+      function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      function renderMandelbrot() {
+        console.log("Rendering Mandelbrot", centerX, centerY, zoomLevel);
+        clearCanvas(); // Clear the canvas before re-rendering
+
+        const width = canvas.width;
+        const height = canvas.height;
+        const maxIterations = 1000;
+
+        const imageData = ctx.createImageData(width, height);
+
+        const pixels = generate_mandelbrot(
+          width,
+          height,
+          maxIterations,
+          centerX,
+          centerY,
+          zoomLevel
+        );
+
+        for (let i = 0; i < pixels.length; i++) {
+          const pixelValue = pixels[i];
+          imageData.data[i * 4] = pixelValue;
+          imageData.data[i * 4 + 1] = pixelValue;
+          imageData.data[i * 4 + 2] = pixelValue;
+          imageData.data[i * 4 + 3] = 255;
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+      }
+
+      // Add the click event listener to the canvas
+      canvas.addEventListener("click", (event) => {
+        // Calculate the new center coordinates based on the click position
+        const x = event.offsetX;
+        const y = event.offsetY;
+
+        // Adjust zoom level and center coordinates
+        zoomLevel *= 2.0;
+        centerX = centerX + (x / canvas.width - 0.5) / zoomLevel;
+        centerY = centerY + (y / canvas.height - 0.5) / zoomLevel;
+
+        // Re-render the Mandelbrot set with the new parameters
+        renderMandelbrot();
+      });
+
+      // Initial rendering
+      renderMandelbrot();
+    }
+
+    run();
+  </script>
+</html>

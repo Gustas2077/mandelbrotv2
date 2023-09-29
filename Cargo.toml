@@ -1,0 +1,17 @@
+[package]
+name = "mandelbrot_viewer"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+wasm-bindgen = "0.2.76"
+
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+panic = "abort"
+
+[package.metadata.wasm-pack.target]
+wasm-bindgen = true
